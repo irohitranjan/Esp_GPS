@@ -1,0 +1,48 @@
+#include <TinyGPS++.h>
+
+
+#define RXD2 16
+#define TXD2 17
+HardwareSerial neogps(2);
+
+TinyGPSPlus gps;
+
+
+void setup() {
+  Serial.begin(115200);
+  Serial.println("esp32 serial initialize");
+  
+
+
+  neogps.begin(9600, SERIAL_8N1, RXD2, TXD2);
+  Serial.println("neogps serial initialize");
+  
+  delay(1000);
+} //setup function ends
+
+void loop(){
+  
+  // Can take up to 60 seconds
+  boolean newData = false;
+  for (unsigned long start = millis(); millis() - start < 2000;)
+  {
+    while (neogps.available())
+    {
+      if (gps.encode(neogps.read()))
+      {
+        newData = true;
+      }
+    }
+  }
+  if (newData)      //If newData is true
+  {
+    Serial.print("Latitude= "); 
+    Serial.print(gps.location.lat(), 6);
+    Serial.print(" Longitude= "); 
+    Serial.println(gps.location.lng(), 6);
+    newData = false;
+   
+    delay(1000);
+    
+  }
+}
